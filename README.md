@@ -25,7 +25,7 @@
   `/api/production/*` 接口；NFC 写卡由可选的本地 `nfc-service` 提供，打印使用
   浏览器 A6 标签。
 - 技术台 `console` 子域与制作工位 `production` 子域使用 mTLS；
-  `play` / `npc` 子域使用普通 Let's Encrypt HTTPS，不要求客户端证书。
+  `play` / `npc` 子域使用普通HTTPS，不要求客户端证书。
 - **首次启动向导**：没有活动数据时，主控台会询问组数和每组人数，自动创建
   `production_tasks`、组别、NTAG token 和二维码，不需要预先准备 CSV。
 - 技术台可以直接创建 NPC；NPC 的击杀码在数据库中统一为 `XXXXXX`，不参与击杀。
@@ -221,7 +221,7 @@ python -m scripts.print_cards --out output/name_tags.html
 
 ### 5. 部署
 
-Ubuntu 24.04 从发布包开始的完整步骤见
+Ubuntu从发布包开始的完整步骤见
 [`DEPLOYMENT.md`](DEPLOYMENT.md)，包含一键安装、Certbot、客户端 CA、mTLS、
 systemd、备份和验收。更细的 Nginx/证书说明见
 [`deploy/README.md`](deploy/README.md)。
@@ -356,31 +356,6 @@ v1.0 数据库启动时自动迁移：旧 `members` 中的种子/制作字段复
 - 导出 CSV 做公式注入防护；备份和导出包含姓名/码，按敏感数据保管。
 - 6 位码限速为进程内状态，因此生产只运行一个 worker。
 
-## 测试
-
-```bash
-python -m pytest -q
-```
-
-当前为 **30 passed**，覆盖：
-
-- 注册、二次碰标签恢复、姓名锁定、重名；
-- 从 `production_tasks` 注册并建立 member 关联；
-- 扫码/手输查询、正常击杀、自爆、二次扫码；
-- 并发同扫只成功一条；
-- 撤销统计回滚/自动复活、复活后再杀、撤销顺序；
-- NPC 补注册/加分/权限边界；
-- 主控 mTLS 拒绝与放行；
-- 手动补录、改名、加分修正/撤销；
-- CSV 导出、公式注入防护；
-- 软重置/硬重置；
-- 首次启动向导：自动建组/任务/token/二维码、重复初始化拒绝、mTLS；
-- 制作工位页面、二维码 SVG、制作 API 4 个接口 + NPC 列表、状态隔离、mTLS、幂等/错误记录；
-- 技术台 NPC 创建、停用、`XXXXXX` 占位击杀码、制作页 NPC 写卡数据；
-- v1.0 → v1.1 `production_tasks` 数据迁移。
-
-实际摄像头扫码、NTAG 碰一碰、iPhone/Android 兼容仍需要现场真机验收。
-
 ## 目录
 
 ```text
@@ -412,22 +387,7 @@ nfc-service/         可选本地 NFC 写卡服务（仅监听 127.0.0.1）
 - 二维码为静态码，防伪依赖活动规则，不防拍照复制。
 - NFC 依赖手机系统后台读取 NDEF URL；iPhone XS / iOS 13+ 体验最佳，现场用 NPC 补注册兜底。
 - 制作工位页面已集成；NFC 写卡是可选的本地 Node 服务，未启动时可用手动标记流程。
-- 重置/撤销/复活都保留历史，不会产生物理删除；需要彻底归档时用导出 + 备份。
-
-## 部署清单
-
-正式上线前至少确认：
-
-- [ ] 四个子域 DNS 与同一张 SAN/通配 HTTPS 证书；
-- [ ] `APP_ENV=production`、`COOKIE_SECURE=true`、`PUBLIC_BASE_URL=https://play...`；
-- [ ] `console` / `production` 子域 `ssl_verify_client on`，`play` / `npc` off；
-- [ ] 主控和制作工具客户端证书来自同一 CA；
-- [ ] 种子 60 人，6 组，每组 ≤10，字段为 `group_no`；
-- [ ] NTAG 写卡回读验证；击杀码标签可扫；
-- [ ] 主控无证书 403 / 有证书 200；制作工位页面/API 无证书 403；
-- [ ] NPC 标签可登录；SSE 正常；
-- [ ] 数据库备份任务已运行；
-- [ ] 在 iPhone 和 Android 各完成一次注册、恢复、击杀、自爆测试。
+- 重置/撤销/复活都保留历史，不会产生物理删除
 
 
 

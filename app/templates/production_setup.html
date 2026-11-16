@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}等待初始化 · 制作工位{% endblock %}
+{% block body_class %}page-production{% endblock %}
+{% block body %}
+<main class="setup-shell">
+  <header class="console-top setup-top">
+    <div class="console-brand">
+      <div class="brand brand-small">
+        <span class="brand-mark" aria-hidden="true"><span></span></span>
+        <span class="brand-text">RIP<span>TAG</span></span>
+      </div>
+      <span class="console-divider"></span>
+      <div class="console-title"><strong>制作工位</strong><span>PRODUCTION</span></div>
+    </div>
+    <span class="mtls-badge">mTLS 已验证</span>
+  </header>
+  <section class="panel setup-success" style="margin-top: 80px">
+    <span class="success-icon" style="border-color: rgba(255,189,89,.4); background: rgba(255,189,89,.06); color: var(--amber)">!</span>
+    <span class="eyebrow">WAITING FOR SETUP</span>
+    <h2>技术台尚未初始化活动</h2>
+    <p>制作任务由技术台首次启用时生成。请主控设备打开主控子域，设置组数和每组人数后回到本页刷新。</p>
+    <div class="setup-success-actions">
+      <button class="btn btn-primary" onclick="location.reload()" type="button">刷新</button>
+    </div>
+  </section>
+</main>
+{% endblock %}

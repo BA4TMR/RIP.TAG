@@ -1,0 +1,20 @@
+{
+  "name": "riptag-nfc-writer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local-only NTAG NDEF writer for the RIP TAG production workstation",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18 <23"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node test/ndef.test.js",
+    "test:runner": "node --test test/*.test.js",
+    "check": "node --check src/server.js && node --check src/ndef.js"
+  },
+  "dependencies": {
+    "nfc-pcsc": "^0.8.1"
+  }
+}

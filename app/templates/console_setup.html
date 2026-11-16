@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}首次启用 · 主控台{% endblock %}
+{% block body_class %}page-console page-setup{% endblock %}
+{% block body %}
+<main class="setup-shell" id="setup-app" data-base="{{ console_base }}">
+  <header class="console-top setup-top">
+    <div class="console-brand">
+      <div class="brand brand-small">
+        <span class="brand-mark" aria-hidden="true"><span></span></span>
+        <span class="brand-text">RIP<span>TAG</span></span>
+      </div>
+      <span class="console-divider"></span>
+      <div class="console-title">
+        <strong>首次启用</strong>
+        <span>INITIAL SETUP</span>
+      </div>
+    </div>
+    <div class="console-status">
+      <span class="mtls-badge">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        mTLS 已验证
+      </span>
+    </div>
+  </header>
+
+  <section class="setup-hero">
+    <span class="eyebrow">FIRST RUN · NO ACTIVITY DATA</span>
+    <h1>先把战场<br>搭起来。</h1>
+    <p>当前数据库还没有任何制作任务。设置组数和每组人数，系统会立即生成组别、
+      正式 NTAG token 和 6 位击杀码，技术台与制作工具马上可用。</p>
+  </section>
+
+  <section class="setup-grid">
+    <form class="panel setup-panel" id="setup-form" novalidate>
+      <div class="setup-panel-head">
+        <span class="setup-step">01</span>
+        <div>
+          <h2>活动规模</h2>
+          <p>最多 6 组，每组最多 10 人，总人数不超过 60。</p>
+        </div>
+      </div>
+
+      <div class="setup-fields">
+        <label class="setup-field">
+          <span>组数</span>
+          <select id="group-count" name="group_count">
+            {% for n in range(1, 7) %}
+            <option value="{{ n }}" {% if n == 6 %}selected{% endif %}>{{ n }} 组</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label class="setup-field">
+          <span>每组人数</span>
+          <select id="per-group" name="per_group">
+            {% for n in range(1, 11) %}
+            <option value="{{ n }}" {% if n == 10 %}selected{% endif %}>{{ n }} 人</option>
+            {% endfor %}
+          </select>
+        </label>
+      </div>
+
+      <div class="setup-total">
+        <span>预计生成</span>
+        <strong id="setup-total">60</strong>
+        <span>名队员 / 60 条制作任务</span>
+      </div>
+
+      <div class="setup-groups" id="setup-groups">
+        <span class="group-preview" style="--group-color:#E53935"><i></i>红队</span>
+        <span class="group-preview" style="--group-color:#1E88E5"><i></i>蓝队</span>
+        <span class="group-preview" style="--group-color:#FDD835"><i></i>黄队</span>
+        <span class="group-preview" style="--group-color:#43A047"><i></i>绿队</span>
+        <span class="group-preview" style="--group-color:#8E24AA"><i></i>紫队</span>
+        <span class="group-preview" style="--group-color:#FB8C00"><i></i>橙队</span>
+      </div>
+
+      <p class="form-error" id="setup-error" role="alert" hidden></p>
+      <button class="btn btn-primary btn-block btn-lg" id="setup-submit" type="submit">
+        生成活动数据
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+      <p class="setup-note">生成后会创建 SQLite 数据库内容与制作任务。请先确认人数，之后可在主控台导出或备份。</p>
+    </form>
+
+    <aside class="panel setup-side">
+      <span class="eyebrow">WHAT HAPPENS</span>
+      <h2>系统会生成</h2>
+      <ul class="setup-list">
+        <li><span>01</span>按组创建红/蓝/黄/绿/紫/橙队及组色。</li>
+        <li><span>02</span>每位队员生成唯一随机 NTAG token。</li>
+        <li><span>03</span>每位队员生成唯一 6 位击杀码与二维码。</li>
+        <li><span>04</span>制作工位立即出现全部待制作任务。</li>
+      </ul>
+      <div class="setup-warning">
+        <strong>生成前请确认</strong>
+        <p>这是首次初始化；生成后不能通过此页面重复生成。已写好的实体标签必须使用这里生成的 token，否则需要重新写卡。</p>
+      </div>
+    </aside>
+  </section>
+
+  <section class="setup-success panel" id="setup-success" hidden>
+    <span class="success-icon">✓</span>
+    <span class="eyebrow">INITIALIZED</span>
+    <h2>活动已就绪</h2>
+    <p id="setup-result"></p>
+    <div class="setup-success-actions">
+      <a class="btn btn-primary" href="{{ console_base }}/">进入主控台</a>
+      <a class="btn btn-ghost" href="{{ console_base }}/">刷新看板</a>
+    </div>
+  </section>
+
+  <footer class="setup-foot">
+    <span>RIP TAG · 技术台</span>
+    <span>所有操作均写入审计日志</span>
+  </footer>
+</main>
+{% endblock %}
+{% block scripts %}<script src="/static/js/console-setup.js" defer></script>{% endblock %}

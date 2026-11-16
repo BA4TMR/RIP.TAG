@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}撕名牌 · 现场技术系统{% endblock %}
+{% block body_class %}page-landing{% endblock %}
+{% block body %}
+<div class="landing-noise" aria-hidden="true"></div>
+<main class="landing">
+  <header class="landing-top">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"><span></span></span>
+      <span class="brand-text">RIP<span>TAG</span></span>
+    </div>
+    <div class="system-status"><i class="live-dot"></i> 系统已就绪</div>
+  </header>
+
+  <section class="landing-hero">
+    <div class="hero-copy">
+      <div class="hero-kicker">LIVE EVENT · 现场技术系统</div>
+      <h1 class="hero-title">
+        <span class="hero-title-line">碰一碰</span>
+        <span class="hero-title-line hero-title-accent">准备开撕<span class="hero-period">。</span></span>
+      </h1>
+      <p class="hero-lede">
+        把手机贴近名牌上的 NTAG 标签，<br>
+        一秒进入你的作战页面。
+      </p>
+    </div>
+    <div class="tap-visual" aria-hidden="true">
+      <div class="tap-phone">
+        <span class="tap-screen"></span>
+        <span class="tap-wave w1"></span>
+        <span class="tap-wave w2"></span>
+      </div>
+      <div class="tap-tag"><span>NTAG</span></div>
+    </div>
+  </section>
+
+  <section class="landing-steps">
+    <article class="step-card">
+      <span class="step-no">01</span>
+      <h2>点亮手机</h2>
+      <p>解锁屏幕，确保 NFC 已开启。iPhone 请从顶部轻碰。</p>
+    </article>
+    <article class="step-card">
+      <span class="step-no">02</span>
+      <h2>贴近名牌</h2>
+      <p>手机背面靠近名牌上的标签，等待系统自动打开页面。</p>
+    </article>
+    <article class="step-card">
+      <span class="step-no">03</span>
+      <h2>开始行动</h2>
+      <p>首次进入填写姓名，之后再次碰标签即可恢复登录。</p>
+    </article>
+  </section>
+
+  <section class="landing-notice">
+    <div class="notice-icon">!</div>
+    <div>
+      <strong>打不开？</strong>
+      <p>请使用 Safari / Chrome，关闭无痕模式；仍无法进入时找身边 NPC 场务补注册。</p>
+    </div>
+  </section>
+
+  <footer class="landing-footer">
+    <span>iPhone XS 及以上 · iOS 13+ · Android NFC 机型</span>
+    <span class="footer-sep">/</span>
+    <span>现场移动数据</span>
+  </footer>
+</main>
+{% endblock %}

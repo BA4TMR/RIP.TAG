@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}身份码 · {{ member.name }}{% endblock %}
+{% block body_class %}page-qr{% endblock %}
+{% block body %}
+<main class="qr-screen" id="qr-app" style="--group-color: {{ group.color }}">
+  <header class="qr-top">
+    <a class="back-link" href="/home" aria-label="返回作战页">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      返回
+    </a>
+    <span class="qr-top-label">身份二维码</span>
+    <button class="icon-btn" id="fullscreen-btn" type="button" aria-label="全屏显示">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5"/></svg>
+    </button>
+  </header>
+
+  <section class="qr-stage">
+    <div class="qr-nameplate">
+      <span class="group-chip"><i></i>{{ group.name }}</span>
+      <h1>{{ member.name }}</h1>
+      <span class="qr-uid" id="qr-content">UID:{{ member.id }}</span>
+    </div>
+
+    <div class="qr-card" id="qr-card">
+      <div class="qr-skeleton" id="qr-skeleton" aria-hidden="true"></div>
+      <img id="qr-image" class="qr-image" alt="我的身份二维码" hidden>
+      <div class="qr-corners" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    </div>
+
+    <div class="qr-hint">
+      <strong>仅用于同名区分</strong>
+      <p>此二维码不参与击杀。自爆只认名牌背面的 6 位击杀码。</p>
+    </div>
+  </section>
+
+  <footer class="qr-foot">
+    <span class="qr-status-dot"></span>
+    屏幕调至最亮，便于裁判核对身份
+  </footer>
+</main>
+{% endblock %}
+{% block scripts %}<script src="/static/js/qr.js" defer></script>{% endblock %}

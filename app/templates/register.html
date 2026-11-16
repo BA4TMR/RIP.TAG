@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}加入 {{ group.name }} · {{ app_name }}{% endblock %}
+{% block body_class %}page-register{% endblock %}
+{% block body %}
+<main class="entry-shell" style="--group-color: {{ group.color }}">
+  <header class="entry-header">
+    <div class="brand brand-small">
+      <span class="brand-mark" aria-hidden="true"><span></span></span>
+      <span class="brand-text">RIP<span>TAG</span></span>
+    </div>
+    <span class="entry-step">新队员登记</span>
+  </header>
+
+  <section class="entry-hero">
+    <div class="group-orbit" aria-hidden="true"></div>
+    <div class="group-chip"><i></i>{{ group.name }}</div>
+    <h1>你的战斗<br>从这里开始</h1>
+    <p>标签已识别。填写真实姓名，登记后姓名将由技术台锁定。</p>
+  </section>
+
+  <section class="panel register-panel">
+    <form id="register-form" novalidate>
+      <input type="hidden" name="ntag_token" value="{{ token }}">
+      <label class="field-label" for="name">你的姓名</label>
+      <div class="field-wrap">
+        <input
+          class="field-input field-name"
+          id="name"
+          name="name"
+          type="text"
+          inputmode="text"
+          autocomplete="name"
+          maxlength="30"
+          placeholder="请输入姓名"
+          required
+          autofocus
+        >
+        <span class="field-line"></span>
+      </div>
+      <p class="field-hint">允许重名，系统会用你的身份码区分。姓名提交后不可自行修改。</p>
+      <p class="form-error" id="form-error" role="alert" hidden></p>
+      <button class="btn btn-primary btn-block btn-lg" id="register-submit" type="submit">
+        <span>确认加入 {{ group.name }}</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </form>
+    <div class="panel-foot">
+      <span class="dot-sep"></span>
+      遇到问题请找附近的 NPC 场务
+    </div>
+  </section>
+
+  <div class="entry-watermark" aria-hidden="true">RIP</div>
+</main>
+<noscript><div class="noscript">需要启用 JavaScript 才能完成登记。</div></noscript>
+{% endblock %}
+{% block scripts %}<script src="/static/js/register.js" defer></script>{% endblock %}

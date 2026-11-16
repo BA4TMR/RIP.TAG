@@ -1,0 +1,296 @@
+# ---------------------------------------------------------------------------
+# RIP TAG v1.1 — subdomain-isolated Nginx example.
+#
+#   play.example.com         public player pages  (no client certificate)
+#   npc.example.com          NPC field desk       (no client certificate)
+#   console.example.com      technical console    (ssl_verify_client on)
+#   production.example.com   production page + API (ssl_verify_client on)
+#
+# Replace all example.com names and certificate paths. One SAN/wildcard
+# certificate can cover all four names. Install only the client CA certificate
+# on the server (never its private key). If the client certificate is issued by
+# an intermediate CA, build riptag-client-ca.crt with the issuing intermediate
+# FIRST and the root LAST; Nginx advertises these names in the TLS handshake.
+#
+# Access logs are intentionally off: /r/<ntag_token> and /staff/<npc_token>
+# contain login credentials. Uvicorn is started with --no-access-log too.
+# ---------------------------------------------------------------------------
+
+# Reusable proxy headers are repeated in each block so the file can be copied
+# as a single vhost set without an extra snippet dependency.
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name play.example.com;
+
+    ssl_certificate     /etc/letsencrypt/live/play.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/play.example.com/privkey.pem;
+
+    # Players and NPCs must NOT be prompted for a client certificate.
+    ssl_verify_client off;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:RIPTAG_PLAY_TLS:10m;
+
+    server_tokens off;
+    access_log off;
+    error_log /var/log/nginx/riptag-play-error.log warn;
+    client_max_body_size 1m;
+
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy no-referrer always;
+    add_header X-Frame-Options DENY always;
+    add_header Permissions-Policy "camera=(self), microphone=()" always;
+
+    # Never expose privileged APIs on the public subdomain.
+    location ^~ /console- { return 404; }
+    location ^~ /api/production/ { return 404; }
+    location ^~ /api/npc/ { return 404; }
+    location = /api/dashboard { return 404; }
+    location = /api/stream { return 404; }
+    location = /staff { return 404; }
+    location ^~ /staff/ { return 404; }
+
+    location /static/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Client-Verify $ssl_client_verify;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Client-Verify $ssl_client_verify;
+        proxy_read_timeout 65s;
+    }
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name npc.example.com;
+
+    ssl_certificate     /etc/letsencrypt/live/play.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/play.example.com/privkey.pem;
+    ssl_verify_client off;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:RIPTAG_NPC_TLS:10m;
+
+    server_tokens off;
+    access_log off;
+    error_log /var/log/nginx/riptag-npc-error.log warn;
+    client_max_body_size 1m;
+
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy no-referrer always;
+    add_header X-Frame-Options DENY always;
+    add_header Permissions-Policy "camera=(self), microphone=()" always;
+
+    location ^~ /console- { return 404; }
+    location ^~ /api/production/ { return 404; }
+
+    location /static/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Client-Verify $ssl_client_verify;
+    }
+
+    location = /api/stream {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Client-Verify $ssl_client_verify;
+        proxy_set_header Connection "";
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 1h;
+        proxy_send_timeout 1h;
+        gzip off;
+    }
+
+    location ^~ /api/npc/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Client-Verify $ssl_client_verify;
+        proxy_read_timeout 65s;
+    }
+
+    location = /api/dashboard {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Client-Verify $ssl_client_verify;
+    }
+
+    location = /staff {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Client-Verify $ssl_client_verify;
+    }
+
+    location ^~ /staff/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Client-Verify $ssl_client_verify;
+    }
+
+    location / { return 404; }
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name console.example.com;
+
+    ssl_certificate     /etc/letsencrypt/live/play.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/play.example.com/privkey.pem;
+
+    # Handshake-level mTLS, per contract A05/T07.
+    ssl_client_certificate /etc/nginx/certs/riptag-client-ca.crt;
+    ssl_verify_client on;
+    ssl_verify_depth 2;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:RIPTAG_CONSOLE_TLS:10m;
+
+    server_tokens off;
+    access_log off;
+    error_log /var/log/nginx/riptag-console-error.log warn;
+    client_max_body_size 1m;
+
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy no-referrer always;
+    add_header X-Frame-Options DENY always;
+
+    location = /console-__CONSOLE_SECRET__ {
+        return 301 /console-__CONSOLE_SECRET__/;
+    }
+
+    location ^~ /console-__CONSOLE_SECRET__/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        # MUST overwrite a client-supplied header.
+        proxy_set_header X-Client-Verify $ssl_client_verify;
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 1h;
+        proxy_send_timeout 1h;
+    }
+
+    location /static/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Client-Verify $ssl_client_verify;
+    }
+
+    location / { return 404; }
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name production.example.com;
+
+    ssl_certificate     /etc/letsencrypt/live/play.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/play.example.com/privkey.pem;
+
+    # Same client CA as the console. The production workstation page and its
+    # API are both served by the main application.
+    ssl_client_certificate /etc/nginx/certs/riptag-client-ca.crt;
+    ssl_verify_client on;
+    ssl_verify_depth 2;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:RIPTAG_PRODUCTION_TLS:10m;
+
+    server_tokens off;
+    access_log off;
+    error_log /var/log/nginx/riptag-production-error.log warn;
+    client_max_body_size 1m;
+
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy no-referrer always;
+    add_header X-Frame-Options DENY always;
+
+    location = /production-__PRODUCTION_SECRET__ {
+        return 301 /production-__PRODUCTION_SECRET__/;
+    }
+
+    location ^~ /production-__PRODUCTION_SECRET__/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        # MUST overwrite a client-supplied header.
+        proxy_set_header X-Client-Verify $ssl_client_verify;
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 1h;
+        proxy_send_timeout 1h;
+    }
+
+    location ^~ /api/production/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Client-Verify $ssl_client_verify;
+        proxy_read_timeout 65s;
+    }
+
+    location /static/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Client-Verify $ssl_client_verify;
+    }
+
+    location / { return 404; }
+}

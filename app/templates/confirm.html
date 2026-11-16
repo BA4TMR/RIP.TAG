@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}确认击杀 · {{ member.name }}{% endblock %}
+{% block body_class %}page-confirm{% endblock %}
+{% block body %}
+<main class="confirm-shell" id="confirm-app"
+      data-code="{{ initial_code }}"
+      data-code-error="{{ code_error }}"
+      data-status="{{ member.status }}"
+      style="--group-color: {{ group.color }}">
+  <header class="simple-top">
+    <a class="back-link" href="/home" aria-label="取消并返回">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      取消
+    </a>
+    <span>击杀确认</span>
+  </header>
+
+  <section class="confirm-head">
+    <span class="eyebrow">TARGET CONFIRMATION</span>
+    <h1>确认目标</h1>
+    <p>请核对姓名与组别，提交后对方将被淘汰。</p>
+  </section>
+
+  <section class="target-card" id="target-card">
+    <div class="target-skeleton" id="target-loading">
+      <span class="skeleton-line w40"></span>
+      <span class="skeleton-line w70"></span>
+      <span class="skeleton-line w50"></span>
+    </div>
+    <div class="target-ready" id="target-ready" hidden>
+      <div class="target-color" id="target-color"></div>
+      <div class="target-avatar" id="target-avatar">?</div>
+      <div class="target-info">
+        <span class="group-chip" id="target-group"><i></i>—</span>
+        <h2 id="target-name">—</h2>
+        <span class="target-status" id="target-status">—</span>
+      </div>
+      <div class="target-crosshair" aria-hidden="true"></div>
+    </div>
+    <div class="target-error" id="target-error" hidden>
+      <strong id="error-title">无法确认目标</strong>
+      <p id="error-message"></p>
+      <a class="btn btn-ghost" href="/kill/manual">重新输入</a>
+    </div>
+  </section>
+
+  <section class="self-warning" id="self-warning" hidden>
+    <span class="warning-mark">!</span>
+    <div>
+      <strong>这是你自己的击杀码，你真的要干掉自己吗？</strong>
+      <p>提交后将自爆：你被淘汰，同时击杀数与个人被击杀数各 +1。</p>
+    </div>
+  </section>
+
+  <section class="confirm-actions" id="confirm-actions" hidden>
+    <button class="btn btn-danger btn-block btn-lg" id="confirm-kill" type="button">
+      <span id="confirm-label">确认淘汰</span>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
+    <a class="btn btn-ghost btn-block" href="/home">取消，返回作战页</a>
+    <p class="confirm-note">此操作将写入活动记录，误杀需联系技术台撤销。</p>
+  </section>
+
+  <section class="kill-success" id="kill-success" hidden aria-live="assertive">
+    <div class="success-burst" aria-hidden="true"></div>
+    <span class="success-icon">✓</span>
+    <span class="eyebrow">CONFIRMED</span>
+    <h2 id="success-title">击杀成功</h2>
+    <p id="success-detail"></p>
+    <a class="btn btn-primary btn-block" href="/home">返回作战页</a>
+  </section>
+</main>
+{% endblock %}
+{% block scripts %}<script src="/static/js/confirm.js" defer></script>{% endblock %}

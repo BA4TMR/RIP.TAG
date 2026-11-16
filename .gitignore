@@ -1,0 +1,51 @@
+# Secrets and local configuration
+.env
+!.env.example
+*.p12
+*.key
+*.crt
+deploy/certs/riptag-certs/
+.local-certs/
+.nginx/
+.nfc-service.env
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+/vendor/
+wheels/
+pip-*/
+pip-debug.log
+.tools/
+.pipwork/
+.tmp/
+*.egg-info/
+
+# Runtime data and backups
+data/activity.db
+data/activity.db-*
+data/_test_*
+data/_production_*
+data/_smoke*
+data/seed-group-no.csv
+backups/
+
+# Generated deliverables
+output/
+dist/
+
+# Node / NFC writer
+node_modules/
+nfc-service/.env
+npm-debug.log*
+
+# Logs and local databases
+*.log
+*.sqlite
+*.sqlite3

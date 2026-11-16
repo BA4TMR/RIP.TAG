@@ -1,0 +1,5 @@
+# /etc/cron.d/riptag-backup
+# Every 10 minutes during the event; keeps the 48 most recent compressed backups.
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+*/10 * * * * riptag cd /opt/riptag && /opt/riptag/.venv/bin/python -m scripts.backup --out /var/backups/riptag --keep 48 >> /var/log/riptag-backup.log 2>&1

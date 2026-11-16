@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}输入击杀码 · {{ member.name }}{% endblock %}
+{% block body_class %}page-manual{% endblock %}
+{% block body %}
+<main class="manual-shell" style="--group-color: {{ group.color }}">
+  <header class="simple-top">
+    <a class="back-link" href="/home" aria-label="返回作战页">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      返回
+    </a>
+    <span>备用击杀方式</span>
+  </header>
+
+  <section class="manual-head">
+    <span class="eyebrow">MANUAL ENTRY</span>
+    <h1>输入 6 位<br>击杀码</h1>
+    <p>击杀码印在对方名牌背面。字母不区分大小写，空格会被自动忽略。</p>
+  </section>
+
+  <section class="panel manual-panel">
+    <form id="manual-form" novalidate>
+      <label class="field-label" for="kill-code">击杀码</label>
+      <input
+        class="code-input"
+        id="kill-code"
+        name="code"
+        type="text"
+        inputmode="text"
+        autocomplete="off"
+        autocapitalize="characters"
+        autocorrect="off"
+        spellcheck="false"
+        maxlength="6"
+        placeholder="A1B2C3"
+        pattern="[A-Za-z0-9]{6}"
+        required
+      >
+      <div class="code-slots" id="code-slots" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <p class="form-error" id="form-error" role="alert" hidden></p>
+      <button class="btn btn-primary btn-block btn-lg" id="manual-submit" type="submit">
+        查询击杀目标
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </form>
+    <p class="field-hint center">查询后仍需二次确认，不会立即淘汰对方。</p>
+  </section>
+
+  <a href="/scan" class="camera-return">
+    <span class="camera-return-icon">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="4"/></svg>
+    </span>
+    <span><strong>改用扫码</strong><small>摄像头可用时更快</small></span>
+    <span class="action-arrow">↗</span>
+  </a>
+</main>
+{% endblock %}
+{% block scripts %}<script src="/static/js/manual.js" defer></script>{% endblock %}

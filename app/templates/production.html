@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}制作工位 · RIP TAG{% endblock %}
+{% block body_class %}page-production{% endblock %}
+{% block body %}
+<main class="prod-shell" id="prod-app" data-base="{{ production_base }}">
+  <header class="prod-top">
+    <div class="prod-brand">
+      <div class="brand brand-small">
+        <span class="brand-mark" aria-hidden="true"><span></span></span>
+        <span class="brand-text">RIP<span>TAG</span></span>
+      </div>
+      <span class="console-divider"></span>
+      <div class="prod-title">
+        <strong>制作工位</strong>
+        <span>NAMEPLATE PRODUCTION</span>
+      </div>
+    </div>
+    <div class="prod-top-actions">
+      <span class="mtls-badge">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        mTLS 已验证
+      </span>
+      <button class="btn btn-ghost btn-sm" id="npc-open" type="button">NPC 标签</button>
+    </div>
+  </header>
+
+  <section class="prod-hero">
+    <div>
+      <span class="eyebrow">NTAG · QR · NAMEPLATE</span>
+      <h1>一桌，一卡，<br>一张名牌。</h1>
+    </div>
+    <div class="prod-nfc" id="nfc-status" data-state="unknown">
+      <span class="prod-nfc-dot"></span>
+      <div>
+        <strong>NFC 写卡器</strong>
+        <span id="nfc-text">检测中…</span>
+      </div>
+      <button class="icon-btn" id="nfc-retry" type="button" title="重新检测">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6v5h-5M4 18v-5h5"/><path d="M6.1 9A7 7 0 0 1 19 12M17.9 15A7 7 0 0 1 5 12"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <section class="prod-stats" id="prod-stats">
+    <div class="prod-stat"><span>全部</span><strong data-stat="total">—</strong></div>
+    <div class="prod-stat"><span>待制作</span><strong data-stat="pending">—</strong></div>
+    <div class="prod-stat"><span>进行中</span><strong data-stat="in_progress">—</strong></div>
+    <div class="prod-stat"><span>已完成</span><strong data-stat="done">—</strong></div>
+    <div class="prod-stat prod-stat-error"><span>异常</span><strong data-stat="failed">—</strong></div>
+    <div class="prod-progress">
+      <div class="prod-progress-head"><span>完成进度</span><strong id="prod-percent">0%</strong></div>
+      <div class="prod-progress-track"><i id="prod-progress-bar"></i></div>
+    </div>
+  </section>
+
+  <section class="prod-workspace">
+    <div class="panel prod-list-panel">
+      <div class="prod-list-head">
+        <div>
+          <span class="eyebrow">QUEUE</span>
+          <h2>制作队列</h2>
+        </div>
+        <span class="prod-count" id="prod-count">—</span>
+      </div>
+      <div class="prod-toolbar">
+        <div class="segmented" id="prod-filter" role="tablist">
+          <button class="is-active" data-filter="all" type="button">全部</button>
+          <button data-filter="pending" type="button">待制作</button>
+          <button data-filter="in_progress" type="button">进行中</button>
+          <button data-filter="done" type="button">已完成</button>
+        </div>
+        <label class="search-field prod-search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
+          <input id="prod-search" type="search" placeholder="搜索编号 / 二维码 / 组别" autocomplete="off">
+        </label>
+      </div>
+      <div class="prod-list" id="prod-list" aria-live="polite">
+        <div class="prod-empty" id="prod-loading">正在加载制作任务…</div>
+      </div>
+    </div>
+
+    <aside class="panel prod-detail" id="prod-detail">
+      <div class="prod-empty" id="prod-detail-empty">
+        <span class="prod-empty-mark">←</span>
+        <strong>选择一件名牌</strong>
+        <p>从左侧队列选择任务，开始写卡、打印和贴牌。</p>
+      </div>
+      <div id="prod-detail-body" hidden></div>
+    </aside>
+  </section>
+
+  <div class="prod-modal" id="npc-modal" hidden>
+    <div class="prod-modal-backdrop" data-npc-close></div>
+    <section class="prod-modal-card" role="dialog" aria-modal="true" aria-labelledby="npc-modal-title">
+      <header class="prod-modal-head">
+        <div>
+          <span class="eyebrow">FIELD STAFF TAGS</span>
+          <h2 id="npc-modal-title">NPC 标签</h2>
+          <p>NPC 不参与击杀，击杀码固定为 XXXXXX。写卡内容为 NPC 的 /staff/ URL。</p>
+        </div>
+        <button class="icon-btn" type="button" data-npc-close aria-label="关闭">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </header>
+      <div class="prod-npc-list" id="npc-list"><div class="prod-empty">正在加载 NPC…</div></div>
+    </section>
+  </div>
+
+  <footer class="prod-foot">
+    <span>制作状态独立于活动数据 · 不参与注册/击杀/看板</span>
+    <span id="prod-updated">—</span>
+  </footer>
+</main>
+{% endblock %}
+{% block scripts %}<script src="/static/js/production.js" defer></script>{% endblock %}

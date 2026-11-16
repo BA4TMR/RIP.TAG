@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}扫码击杀 · {{ member.name }}{% endblock %}
+{% block body_class %}page-scan{% endblock %}
+{% block body %}
+<main class="scanner-shell" id="scan-app" data-status="{{ member.status }}">
+  <header class="scanner-top">
+    <a class="back-link back-link-light" href="/home" aria-label="返回作战页">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      返回
+    </a>
+    <span class="scanner-title">扫码击杀</span>
+    <span class="scanner-badge"><i class="live-dot"></i> CAM</span>
+  </header>
+
+  <section class="camera-stage">
+    <div id="reader" class="reader"></div>
+    <div class="camera-overlay" aria-hidden="true">
+      <div class="scan-frame">
+        <span class="corner tl"></span><span class="corner tr"></span>
+        <span class="corner bl"></span><span class="corner br"></span>
+        <span class="scan-line"></span>
+      </div>
+    </div>
+
+    <div class="camera-placeholder" id="camera-placeholder">
+      <div class="camera-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="4"/></svg>
+      </div>
+      <h1>对准名牌背面</h1>
+      <p>将二维码完整放入取景框，系统会自动识别。</p>
+      <div class="camera-actions">
+        <button class="btn btn-primary" id="start-camera" type="button">开启摄像头</button>
+        <label class="btn btn-ghost" for="scan-file">拍照识别</label>
+      </div>
+      <input id="scan-file" class="visually-hidden" type="file" accept="image/*" capture="environment">
+      <span class="camera-note">摄像头不可用时，可拍照或从相册选择二维码</span>
+    </div>
+
+    <div class="camera-status" id="camera-status" role="status">
+      <span class="status-spinner" id="status-spinner" hidden></span>
+      <span id="status-text">准备就绪</span>
+    </div>
+  </section>
+
+  {% if member.status == 'eliminated' %}
+  <div class="camera-blocked">
+    <strong>你已被淘汰</strong>
+    <p>不能继续扫码击杀，请离场观战。</p>
+  </div>
+  {% endif %}
+
+  <footer class="scanner-foot">
+    <p>扫到自己的击杀码会触发自爆。提交前还会再确认一次。</p>
+    <a href="/kill/manual" class="text-link">摄像头不可用？手动输入击杀码 <span>→</span></a>
+  </footer>
+</main>
+{% endblock %}
+{% block scripts %}
+<script src="/static/vendor/html5-qrcode.min.js?v=20261116" defer></script>
+<script src="/static/js/scan.js?v=20261116" defer></script>
+{% endblock %}

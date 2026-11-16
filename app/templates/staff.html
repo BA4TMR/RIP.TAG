@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}NPC 场务台 · {{ app_name }}{% endblock %}
+{% block body_class %}page-staff{% endblock %}
+{% block body %}
+<div class="staff-shell" id="staff-app">
+  <header class="staff-top">
+    <div class="staff-brand">
+      <div class="brand brand-small">
+        <span class="brand-mark" aria-hidden="true"><span></span></span>
+        <span class="brand-text">RIP<span>TAG</span></span>
+      </div>
+      <span class="staff-role">NPC 场务台</span>
+    </div>
+    <div class="staff-identity">
+      <span class="live-status" id="live-status"><i class="live-dot"></i><span>实时连接中</span></span>
+      <span class="staff-name">{{ staff.name }}</span>
+      <button class="icon-btn" id="staff-logout" type="button" aria-label="退出场务台">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4M14 8l4 4-4 4M9 12h9"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="staff-main">
+    <section class="staff-heading">
+      <div>
+        <span class="eyebrow">FIELD OPERATIONS</span>
+        <h1>现场态势</h1>
+      </div>
+      <div class="round-card">
+        <span>当前轮次</span>
+        <strong>{{ round.name }}</strong>
+      </div>
+    </section>
+
+    <section class="staff-totals" id="staff-totals" aria-label="全场汇总">
+      <div class="mini-stat"><span>总人数</span><strong data-total="total_members">—</strong></div>
+      <div class="mini-stat"><span>存活</span><strong data-total="alive">—</strong></div>
+      <div class="mini-stat"><span>已淘汰</span><strong data-total="eliminated">—</strong></div>
+      <div class="mini-stat"><span>击杀</span><strong data-total="kills">—</strong></div>
+    </section>
+
+    <nav class="staff-tabs" aria-label="场务功能">
+      <button class="tab-btn is-active" type="button" data-tab="live">实时看板</button>
+      <button class="tab-btn" type="button" data-tab="register">补注册 <span class="tab-count" id="unregistered-count">—</span></button>
+      <button class="tab-btn" type="button" data-tab="score">组加分</button>
+    </nav>
+
+    <section class="tab-panel" id="panel-live">
+      <div class="group-grid" id="staff-groups">
+        <div class="group-card skeleton-card"></div>
+        <div class="group-card skeleton-card"></div>
+        <div class="group-card skeleton-card"></div>
+      </div>
+
+      <div class="staff-columns">
+        <section class="panel live-feed-panel">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow">LIVE FEED</span>
+              <h2>最近击杀</h2>
+            </div>
+            <span class="feed-count" id="feed-count">0</span>
+          </div>
+          <div class="live-feed" id="staff-feed">
+            <div class="empty-state">等待第一条击杀记录</div>
+          </div>
+        </section>
+        <aside class="panel staff-tips">
+          <span class="eyebrow">NPC CHECKLIST</span>
+          <h2>场务提示</h2>
+          <ul class="check-list">
+            <li><span>01</span>遇到无法碰开标签的队员，先在「补注册」中创建姓名。</li>
+            <li><span>02</span>补注册不能覆盖已有姓名，改名必须找技术台。</li>
+            <li><span>03</span>只给本组加分；撤销与扣分请联系技术台。</li>
+            <li><span>04</span>发现统计异常时立刻呼叫技术台，不要自行处理。</li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+    <section class="tab-panel" id="panel-register" hidden>
+      <div class="panel">
+        <div class="panel-head split">
+          <div>
+            <span class="eyebrow">ASSISTED SIGN-UP</span>
+            <h2>补注册</h2>
+          </div>
+          <div class="search-field">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+            <input type="search" id="member-search" placeholder="搜索姓名 / 编号 / 组别" autocomplete="off">
+          </div>
+        </div>
+        <p class="panel-intro">未注册队员可直接补登记；已注册队员仅可查看状态。注册后姓名立即锁定，NPC 无法覆盖。</p>
+        <div class="member-assist-list" id="assist-list">
+          <div class="empty-state">正在加载队员名单…</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tab-panel" id="panel-score" hidden>
+      <div class="score-layout">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow">GROUP POINTS</span>
+              <h2>给指定组加分</h2>
+            </div>
+          </div>
+          <form id="npc-score-form" class="stack-form" novalidate>
+            <label class="field-label" for="score-group">选择组别</label>
+            <select class="field-input" id="score-group" name="group_id" required>
+              {% for group in groups %}
+              <option value="{{ group.id }}">{{ group.name }}</option>
+              {% endfor %}
+            </select>
+            <label class="field-label" for="score-delta">加分分值</label>
+            <div class="quick-points" id="quick-points">
+              <button type="button" data-points="5">+5</button>
+              <button type="button" data-points="10">+10</button>
+              <button type="button" data-points="20">+20</button>
+              <button type="button" data-points="50">+50</button>
+            </div>
+            <input class="field-input" id="score-delta" name="delta" type="number" inputmode="numeric" min="1" max="1000" value="10" required>
+            <label class="field-label" for="score-reason">原因 <span class="label-optional">选填</span></label>
+            <input class="field-input" id="score-reason" name="reason" type="text" maxlength="120" placeholder="例如：完成支线任务">
+            <p class="form-error" id="score-error" role="alert" hidden></p>
+            <button class="btn btn-primary btn-block" id="score-submit" type="submit">确认加分</button>
+          </form>
+          <p class="field-hint">NPC 只能加分，不能撤销或扣分。记录会进入技术台审计。</p>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow">RECENT</span>
+              <h2>本轮加分记录</h2>
+            </div>
+          </div>
+          <div class="score-feed" id="score-feed">
+            <div class="empty-state">本轮暂无加分</div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+</div>
+{% endblock %}
+{% block scripts %}<script src="/static/js/staff.js" defer></script>{% endblock %}

@@ -1,0 +1,338 @@
+{% extends "base.html" %}
+{% block title %}主控台 · {{ app_name }}{% endblock %}
+{% block body_class %}page-console{% endblock %}
+{% block body %}
+<div class="console-shell" id="console-app" data-base="{{ console_base }}">
+  <header class="console-top">
+    <div class="console-brand">
+      <div class="brand brand-small">
+        <span class="brand-mark" aria-hidden="true"><span></span></span>
+        <span class="brand-text">RIP<span>TAG</span></span>
+      </div>
+      <span class="console-divider"></span>
+      <div class="console-title">
+        <strong>主控台</strong>
+        <span>MISSION CONTROL</span>
+      </div>
+    </div>
+    <div class="console-status">
+      <span class="mtls-badge">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        mTLS 已验证
+      </span>
+      <span class="live-status" id="console-live"><i class="live-dot"></i><span>SSE 连接中</span></span>
+      <span class="round-chip">当前 · <strong id="console-round">{{ round.name }}</strong></span>
+    </div>
+  </header>
+
+  <main class="console-main">
+    <section class="console-overview">
+      <div class="overview-title">
+        <span class="eyebrow">EVENT OVERVIEW</span>
+        <h1>全场态势</h1>
+      </div>
+      <div class="overview-stats" id="overview-stats">
+        <div class="overview-stat"><span>总人数</span><strong data-total="total_members">—</strong></div>
+        <div class="overview-stat"><span>存活</span><strong data-total="alive">—</strong></div>
+        <div class="overview-stat"><span>已淘汰</span><strong data-total="eliminated">—</strong></div>
+        <div class="overview-stat accent"><span>有效击杀</span><strong data-total="kills">—</strong></div>
+      </div>
+    </section>
+
+    <div class="console-layout">
+      <section class="console-groups">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">TEAMS</span>
+            <h2>组别战况</h2>
+          </div>
+          <span class="section-note">存活 / 总人数 · 击杀 · 被击杀 · 积分</span>
+        </div>
+        <div class="console-group-grid" id="console-groups">
+          {% for group in groups %}
+          <article class="console-group-card" style="--group-color: {{ group.color }}">
+            <div class="console-group-head"><i></i><span>{{ group.name }}</span></div>
+            <div class="skeleton-line w60"></div>
+          </article>
+          {% endfor %}
+        </div>
+      </section>
+
+      <aside class="console-side">
+        <section class="panel live-feed-panel console-feed-panel">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow">LIVE FEED</span>
+              <h2>实时击杀</h2>
+            </div>
+            <span class="feed-count" id="console-feed-count">0</span>
+          </div>
+          <div class="live-feed console-feed" id="console-feed">
+            <div class="empty-state">等待击杀记录</div>
+          </div>
+        </section>
+        <section class="panel quick-actions">
+          <span class="eyebrow">QUICK OPS</span>
+          <h2>应急操作</h2>
+          <button class="quick-action" type="button" data-goto-tab="system" data-focus="manual-kill-killer">
+            <span class="quick-icon">+</span>
+            <span><strong>手动补录击杀</strong><small>用于扫码失败时兜底</small></span>
+          </button>
+          <button class="quick-action" type="button" data-goto-tab="members">
+            <span class="quick-icon">↺</span>
+            <span><strong>复活队员</strong><small>在成员表中查找并复活</small></span>
+          </button>
+          <button class="quick-action" type="button" data-goto-tab="kills">
+            <span class="quick-icon">×</span>
+            <span><strong>撤销击杀</strong><small>撤销后自动复活被击杀者</small></span>
+          </button>
+        </section>
+      </aside>
+    </div>
+
+    <section class="console-workspace">
+      <nav class="console-tabs" aria-label="主控功能">
+        <button class="tab-btn is-active" type="button" data-tab="members">成员管理</button>
+        <button class="tab-btn" type="button" data-tab="kills">击杀记录</button>
+        <button class="tab-btn" type="button" data-tab="scores">积分管理</button>
+        <button class="tab-btn" type="button" data-tab="npcs">NPC 管理</button>
+        <button class="tab-btn" type="button" data-tab="audit">审计日志</button>
+        <button class="tab-btn" type="button" data-tab="system">系统与导出</button>
+      </nav>
+
+      <section class="tab-panel console-panel" id="panel-members">
+        <div class="table-toolbar">
+          <div class="search-field">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+            <input type="search" id="member-search" placeholder="搜索姓名 / 编号 / 击杀码" autocomplete="off">
+          </div>
+          <select class="compact-select" id="member-group-filter" aria-label="按组筛选">
+            <option value="">全部组别</option>
+            {% for group in groups %}<option value="{{ group.id }}">{{ group.name }}</option>{% endfor %}
+          </select>
+          <select class="compact-select" id="member-status-filter" aria-label="按状态筛选">
+            <option value="all">全部状态</option>
+            <option value="active">存活</option>
+            <option value="eliminated">已淘汰</option>
+            <option value="unregistered">未注册</option>
+          </select>
+          <button class="btn btn-small btn-ghost" type="button" id="member-refresh">刷新</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="member-table">
+            <thead>
+              <tr><th>队员</th><th>组别</th><th>状态</th><th>击杀码</th><th>注册时间</th><th class="align-right">操作</th></tr>
+            </thead>
+            <tbody><tr><td colspan="6" class="table-empty">正在加载…</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="tab-panel console-panel" id="panel-kills" hidden>
+        <div class="table-toolbar">
+          <select class="compact-select" id="kill-status-filter" aria-label="按击杀状态筛选">
+            <option value="active">有效击杀</option>
+            <option value="revoked">已撤销</option>
+            <option value="all">全部状态</option>
+          </select>
+          <select class="compact-select" id="kill-scope-filter" aria-label="按轮次筛选">
+            <option value="current">当前轮次</option>
+            <option value="all">全部轮次</option>
+          </select>
+          <button class="btn btn-small btn-ghost" type="button" id="kill-refresh">刷新</button>
+          <span class="toolbar-spacer"></span>
+          <span class="toolbar-hint">撤销有效击杀会同步回滚统计并复活被击杀者</span>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="kill-table">
+            <thead>
+              <tr><th>时间</th><th>击杀者</th><th>被击杀者</th><th>方式</th><th>来源</th><th>状态</th><th class="align-right">操作</th></tr>
+            </thead>
+            <tbody><tr><td colspan="7" class="table-empty">正在加载…</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="tab-panel console-panel" id="panel-scores" hidden>
+        <div class="score-console-layout">
+          <form class="inline-card score-form-console" id="console-score-form" novalidate>
+            <div class="panel-head">
+              <div><span class="eyebrow">ADJUST</span><h2>新增积分修正</h2></div>
+            </div>
+            <p>正数加分，负数扣分。NPC 只能加分，主控可修正。</p>
+            <div class="form-row">
+              <label>组别
+                <select class="field-input" id="console-score-group" required>
+                  {% for group in groups %}<option value="{{ group.id }}">{{ group.name }}</option>{% endfor %}
+                </select>
+              </label>
+              <label>分值
+                <input class="field-input" id="console-score-delta" type="number" min="-1000" max="1000" value="10" required>
+              </label>
+            </div>
+            <label class="field-label" for="console-score-reason">原因</label>
+            <input class="field-input" id="console-score-reason" type="text" maxlength="120" placeholder="修正原因将写入审计">
+            <p class="form-error" id="console-score-error" role="alert" hidden></p>
+            <button class="btn btn-primary btn-block" type="submit" id="console-score-submit">提交积分修正</button>
+          </form>
+          <div class="table-wrap panel">
+            <div class="table-toolbar compact">
+              <select class="compact-select" id="score-scope-filter" aria-label="积分轮次">
+                <option value="current">当前轮次</option>
+                <option value="all">全部轮次</option>
+              </select>
+              <button class="btn btn-small btn-ghost" type="button" id="score-refresh">刷新</button>
+            </div>
+            <table class="data-table" id="score-table">
+              <thead>
+                <tr><th>时间</th><th>组别</th><th>分值</th><th>原因</th><th>操作者</th><th>状态</th><th class="align-right">操作</th></tr>
+              </thead>
+              <tbody><tr><td colspan="7" class="table-empty">正在加载…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-panel console-panel" id="panel-npcs" hidden>
+        <div class="npc-console-layout">
+          <section class="inline-card">
+            <div class="panel-head split">
+              <div>
+                <span class="eyebrow">FIELD STAFF</span>
+                <h2>创建 NPC</h2>
+              </div>
+            </div>
+            <p class="panel-intro">NPC 用于现场补注册和组加分。创建后将 URL 写入
+              NPC 的 NTAG；NPC 不参与击杀，击杀码统一为 <code>XXXXXX</code>。</p>
+            <form id="npc-create-form" class="stack-form" novalidate>
+              <label class="field-label" for="npc-name">NPC 名称</label>
+              <input class="field-input" id="npc-name" name="name" type="text"
+                     maxlength="40" placeholder="例如：NPC-A / 场务小王" required>
+              <p class="form-error" id="npc-create-error" role="alert" hidden></p>
+              <button class="btn btn-primary btn-block" id="npc-create-submit"
+                      type="submit">创建 NPC</button>
+            </form>
+            <div class="npc-created" id="npc-created" hidden>
+              <span class="eyebrow">CREATED</span>
+              <strong id="npc-created-name"></strong>
+              <code id="npc-created-url"></code>
+              <button class="btn btn-ghost btn-small" id="npc-copy-created"
+                      type="button">复制 URL</button>
+              <p>把该 URL 写入 NPC NTAG；标签上的击杀码固定为 XXXXXX。</p>
+            </div>
+          </section>
+          <section class="inline-card npc-list-card">
+            <div class="panel-head split">
+              <div>
+                <span class="eyebrow">NPC TOKENS</span>
+                <h2>场务令牌</h2>
+              </div>
+              <button class="btn btn-small btn-ghost" type="button"
+                      id="npc-refresh">刷新</button>
+            </div>
+            <table class="data-table" id="npc-table">
+              <thead>
+                <tr><th>NPC</th><th>击杀码</th><th>状态</th><th>URL</th><th class="align-right">操作</th></tr>
+              </thead>
+              <tbody><tr><td colspan="5" class="table-empty">正在加载…</td></tr></tbody>
+            </table>
+          </section>
+        </div>
+      </section>
+
+      <section class="tab-panel console-panel" id="panel-audit" hidden>
+        <div class="table-toolbar">
+          <select class="compact-select" id="audit-scope-filter" aria-label="审计轮次">
+            <option value="all">全部轮次</option>
+            <option value="current">当前轮次</option>
+          </select>
+          <select class="compact-select" id="audit-action-filter" aria-label="审计动作">
+            <option value="">全部动作</option>
+            <option value="kill_recorded">击杀记录</option>
+            <option value="kill_self">自爆</option>
+            <option value="kill_revoked">撤销击杀</option>
+            <option value="member_revived">复活队员</option>
+            <option value="member_name_changed">修改姓名</option>
+            <option value="member_registered">队员注册</option>
+            <option value="npc_registered_member">NPC 补注册</option>
+            <option value="score_added">新增积分</option>
+            <option value="score_revoked">撤销积分</option>
+            <option value="activity_reset_soft">软重置</option>
+            <option value="activity_reset_hard">硬重置</option>
+            <option value="export_created">导出</option>
+            <option value="production_written">制作-写卡</option>
+            <option value="production_printed">制作-打印</option>
+            <option value="production_done">制作-完成</option>
+            <option value="production_error">制作-异常</option>
+            <option value="production_reset">制作-重置</option>
+          </select>
+          <button class="btn btn-small btn-ghost" type="button" id="audit-refresh">刷新</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table audit-table" id="audit-table">
+            <thead>
+              <tr><th>时间</th><th>操作者</th><th>动作</th><th>对象</th><th>详情</th></tr>
+            </thead>
+            <tbody><tr><td colspan="5" class="table-empty">正在加载…</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="tab-panel console-panel" id="panel-system" hidden>
+        <div class="system-grid">
+          <section class="inline-card">
+            <div class="panel-head"><div><span class="eyebrow">MANUAL KILL</span><h2>手动补录击杀</h2></div></div>
+            <p>仅用于扫码/手输失败时兜底。时间取服务器当前时间，记录来源标记「技术台手动添加」。</p>
+            <form id="manual-kill-form" novalidate>
+              <label class="field-label" for="manual-kill-killer">击杀者</label>
+              <select class="field-input" id="manual-kill-killer" required></select>
+              <label class="field-label" for="manual-kill-victim">被击杀者</label>
+              <select class="field-input" id="manual-kill-victim" required></select>
+              <label class="field-label" for="manual-kill-note">备注 <span class="label-optional">选填</span></label>
+              <input class="field-input" id="manual-kill-note" type="text" maxlength="120" placeholder="例如：扫码失败，现场核实">
+              <p class="form-error" id="manual-kill-error" role="alert" hidden></p>
+              <button class="btn btn-danger btn-block" type="submit" id="manual-kill-submit">确认补录并淘汰</button>
+            </form>
+          </section>
+
+          <section class="inline-card">
+            <div class="panel-head"><div><span class="eyebrow">EXPORT</span><h2>数据导出</h2></div></div>
+            <p>CSV 使用 UTF-8 BOM，可直接用 Excel 打开。导出动作同样写入审计。</p>
+            <div class="export-grid">
+              <a class="export-btn" href="#" data-export="kills">击杀记录<span>KILLS ↓</span></a>
+              <a class="export-btn" href="#" data-export="scores">积分记录<span>SCORES ↓</span></a>
+              <a class="export-btn" href="#" data-export="audit">审计日志<span>AUDIT ↓</span></a>
+              <a class="export-btn" href="#" data-export="summary">本轮统计<span>SUMMARY ↓</span></a>
+            </div>
+            <label class="inline-check"><input type="checkbox" id="export-all-scope"> 导出全部轮次（统计表固定为当前轮）</label>
+          </section>
+
+          <section class="inline-card danger-card">
+            <div class="panel-head"><div><span class="eyebrow">DANGER ZONE</span><h2>重置活动</h2></div></div>
+            <p>默认软重置：新建轮次，保留姓名与标签绑定，全员恢复存活，击杀与积分从新轮开始。历史数据保留。</p>
+            <div class="radio-row">
+              <label class="radio-card"><input type="radio" name="reset-mode" value="soft" checked><span><strong>软重置</strong><small>保留姓名 / 绑定</small></span></label>
+              <label class="radio-card"><input type="radio" name="reset-mode" value="hard"><span><strong>硬清空姓名</strong><small>保留标签 / 二维码绑定</small></span></label>
+            </div>
+            <label class="field-label" for="reset-confirm">输入 <code>RESET</code> 确认</label>
+            <input class="field-input" id="reset-confirm" type="text" autocomplete="off" placeholder="RESET">
+            <p class="form-error" id="reset-error" role="alert" hidden></p>
+            <button class="btn btn-danger btn-block" type="button" id="reset-btn">执行重置</button>
+          </section>
+
+          <section class="inline-card system-notes">
+            <div class="panel-head"><div><span class="eyebrow">RUNBOOK</span><h2>技术台提示</h2></div></div>
+            <ul class="check-list">
+              <li><span>01</span>撤销击杀会回滚统计并自动复活被击杀者；主控复活不会回滚历史击杀。</li>
+              <li><span>02</span>复活后再次被击杀，按新的一次击杀计入统计。</li>
+              <li><span>03</span>重置前请先导出 CSV，并备份 SQLite 数据库文件。</li>
+              <li><span>04</span>所有时间以服务器 UTC 入库，界面自动按本地时区显示。</li>
+            </ul>
+          </section>
+        </div>
+      </section>
+    </section>
+  </main>
+</div>
+{% endblock %}
+{% block scripts %}<script src="/static/js/console.js" defer></script>{% endblock %}

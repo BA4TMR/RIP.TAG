@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · {{ app_name }}{% endblock %}
+{% block body_class %}page-error{% endblock %}
+{% block body %}
+<main class="error-shell">
+  <div class="brand brand-small">
+    <span class="brand-mark" aria-hidden="true"><span></span></span>
+    <span class="brand-text">RIP<span>TAG</span></span>
+  </div>
+  <div class="error-code">{{ error_status if error_status is defined else "!" }}</div>
+  <h1>{{ title }}</h1>
+  <p>{{ message }}</p>
+  <div class="error-actions">
+    <a class="btn btn-primary" href="/">返回入口</a>
+    <a class="btn btn-ghost" href="/home">我的作战页</a>
+  </div>
+  <p class="error-hint">仍然无法解决？请找身边的 NPC 场务或技术台。</p>
+</main>
+{% endblock %}
